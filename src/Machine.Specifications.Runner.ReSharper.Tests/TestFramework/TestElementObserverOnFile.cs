@@ -1,4 +1,5 @@
-﻿using JetBrains.ReSharper.UnitTestFramework.Elements;
+﻿using JetBrains.ReSharper.Psi;
+using JetBrains.ReSharper.UnitTestFramework.Elements;
 using JetBrains.ReSharper.UnitTestFramework.Exploration;
 using JetBrains.Util;
 
@@ -28,5 +29,7 @@ namespace Machine.Specifications.Runner.ReSharper.Tests.TestFramework
         public void OnUnitTestElementDisposition(IUnitTestLikeElement element, TextRange navigationRange, TextRange containingRange)
         {
         }
+
+        public IPsiSourceFile PsiSourceFile { get; }
     }
 }

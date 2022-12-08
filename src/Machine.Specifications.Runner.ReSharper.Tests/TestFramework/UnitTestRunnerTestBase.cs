@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
+using System.Threading.Tasks;
 using JetBrains.Lifetimes;
 using JetBrains.ProjectModel;
 using JetBrains.ReSharper.FeaturesTestFramework.UnitTesting;
@@ -65,7 +66,7 @@ namespace Machine.Specifications.Runner.ReSharper.Tests.TestFramework
             });
         }
 
-        private ICollection<IUnitTestElement> GetUnitTestElements(IProject testProject)
+        private async Task<ICollection<IUnitTestElement>> GetUnitTestElements(IProject testProject, CancellationToken token)
         {
             var provider = UT.Facade.ProviderCache.GetProviderByProviderId(MspecTestProvider.Id);
 
@@ -78,14 +79,12 @@ namespace Machine.Specifications.Runner.ReSharper.Tests.TestFramework
             var discoveryManager = Solution.GetComponent<IUnitTestDiscoveryManager>();
             var metadataExplorer = Solution.GetComponent<MspecTestExplorerFromArtifacts>();
 
-            using (var transaction = discoveryManager.BeginTransaction(source))
-            {
-                metadataExplorer.ProcessArtifact(transaction.Observer, CancellationToken.None).Wait();
+            using var transaction = discoveryManager.BeginTransaction(source);
+            await metadataExplorer.ProcessArtifact(transaction.Observer, token);
 
-                transaction.Commit();
+            await transaction.CommitAsync(token);
 
-                return transaction.Elements;
-            }
+            return transaction.Elements;
         }
 
         private void WriteResults(TextWriter output)
